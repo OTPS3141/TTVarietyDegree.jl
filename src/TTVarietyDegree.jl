@@ -14,7 +14,7 @@ export compute_tail_polynomial,
        compute_fP,
        degree_TT_variety,
        dimension_TT_variety,
-       compress_vacuous_boundary_modes,
+       compress_vacuous_boundary_modes
 
 # Partition keys are stored as tuples, for example (6, 4).
 const Partition = Tuple{Vararg{Int}}
@@ -1002,7 +1002,7 @@ Partitions are stored as tuples, for example `(6, 4)`, and coefficients are
 exact `Rational{BigInt}` values. Set `verbose=true` to print each local
 Schur-Weingarten averaging step to `io`.
 """
-function compute_tail_polynomial(D, d; verbose::Bool=true, io::IO=stdout)
+function compute_tail_polynomial(D, d; verbose::Bool=false, io::IO=stdout)
     D = Int[x for x in D]
     d = Int[x for x in d]
     N = _validate_TT_input(D, d)
@@ -1143,7 +1143,7 @@ function degree_TT_variety(D, d; method::Symbol=:schur_weingarten, reduce::Bool=
     end
 
     N = Base.length(d)
-    P_coeffs = compute_tail_polynomial(D, d, verbose=verbose)
+    P_coeffs = compute_tail_polynomial(D, d; verbose=verbose)
     fP = compute_fP(P_coeffs, D[N], d[N])
 
     degree = fP // big(1)
@@ -1183,3 +1183,4 @@ function dimension_TT_variety(D, d)
     return running + D[N] * d[N] - 1
 end
 
+end # module TTVarietyDegree
