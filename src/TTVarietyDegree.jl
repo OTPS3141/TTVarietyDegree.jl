@@ -1,5 +1,5 @@
 """
-Exact symbolic degree computations for tensor train varieties.
+Exact degree computations for tensor train varieties.
 
 The public API computes projective dimensions, recursive Schur tail
 polynomials, the final functional ``f(P)``, and degrees of tensor train
@@ -15,7 +15,6 @@ export compute_tail_polynomial,
        degree_TT_variety,
        dimension_TT_variety,
        compress_vacuous_boundary_modes,
-       degree_subspace_variety_N3
 
 # Partition keys are stored as tuples, for example (6, 4).
 const Partition = Tuple{Vararg{Int}}
@@ -1118,105 +1117,6 @@ function compress_vacuous_boundary_modes(D, d)
     return D, d
 end
 
-# Input: sparse polynomial poly, variable indices i,j, and target exponent tuple.
-# Output: sparse polynomial for poly*(x_i-x_j), discarding monomials above target.
-# Role: helper for the optional three-way subspace coefficient extraction.
-function _multiply_linear_difference(poly, i::Int, j::Int, target::Partition)
-    out = Dict{Partition, BigInt}()
-    for (exp, coeff) in poly
-        exp_i = collect(exp)
-        exp_i[i] += 1
-        if exp_i[i] <= target[i]
-            key = Tuple(exp_i)
-            out[key] = get(out, key, big(0)) + coeff
-        end
-
-        exp_j = collect(exp)
-        exp_j[j] += 1
-        if exp_j[j] <= target[j]
-            key = Tuple(exp_j)
-            out[key] = get(out, key, big(0)) - coeff
-        end
-    end
-    return _cleanup!(out)
-end
-
-# Input: sparse polynomial poly, variable indices xi,zj, multiplicity, target.
-# Output: poly multiplied by the truncated expansion of
-# (1 - x_xi - z_zj)^(-multiplicity).
-# Role: helper for the optional three-way subspace formula.
-function _multiply_pair_segre_factor(poly, xi::Int, zj::Int, multiplicity::Int, target::Partition)
-    out = Dict{Partition, BigInt}()
-    for (exp, coeff) in poly
-        max_u = target[xi] - exp[xi]
-        max_v = target[zj] - exp[zj]
-        for u in 0:max_u, v in 0:max_v
-            q = u + v
-            series_coeff = binomial(big(multiplicity + q - 1), q) * binomial(big(q), u)
-            values = collect(exp)
-            values[xi] += u
-            values[zj] += v
-            key = Tuple(values)
-            out[key] = get(out, key, big(0)) + coeff * series_coeff
-        end
-    end
-    return _cleanup!(out)
-end
-
-"""
-    degree_subspace_variety_N3(D, d)
-
-Compute the degree of a three-way tensor train variety using the standard
-subspace-variety coefficient formula.
-
-The input must have the form
-
-```julia
-D = [1, r, s, 1]
-d = [a, b, c]
-```
-
-The variety is the subspace variety obtained by choosing an `r`-dimensional
-subspace in the first tensor factor and an `s`-dimensional subspace in the
-third tensor factor. The degree is computed as the coefficient integral over
-`Gr(r,a) x Gr(s,c)`.
-
-This is an optional verification route. The default degree computation uses
-the Schur-Weingarten recursion instead.
-"""
-function degree_subspace_variety_N3(D, d)
-    D = Int[x for x in D]
-    d = Int[x for x in d]
-    N = _validate_TT_input(D, d)
-    N == 3 || throw(ArgumentError("degree_subspace_variety_N3 expects length(d) == 3"))
-
-    a, b, c = d
-    r = D[2]
-    s = D[3]
-    r <= a || throw(ArgumentError("expected D_1 <= d_1"))
-    s <= c || throw(ArgumentError("expected D_2 <= d_3"))
-
-    target = Tuple(vcat([a - i for i in 1:r], [c - j for j in 1:s]))
-    poly = Dict{Partition, BigInt}(ntuple(_ -> 0, r + s) => big(1))
-
-    if r > 1
-        for i in 1:(r - 1), j in (i + 1):r
-            poly = _multiply_linear_difference(poly, i, j, target)
-        end
-    end
-
-    if s > 1
-        for i in 1:(s - 1), j in (i + 1):s
-            poly = _multiply_linear_difference(poly, r + i, r + j, target)
-        end
-    end
-
-    for i in 1:r, j in 1:s
-        poly = _multiply_pair_segre_factor(poly, i, r + j, b, target)
-    end
-
-    return get(poly, target, big(0))
-end
 
 
 """
@@ -1226,9 +1126,7 @@ Compute the projective degree of the tensor train variety with rank signature
 `D = [D_0, ..., D_N]` and mode dimensions `d = [d_1, ..., d_N]`.
 
 By default, vacuous full-rank boundary modes are first compressed and the exact
-Schur-Weingarten recursion is applied to the reduced signature. Passing
-`method=:subspace` uses `degree_subspace_variety_N3` after reduction, and
-therefore requires the reduced input to be three-way.
+Schur-Weingarten recursion is applied to the reduced signature. 
 
 Returns the degree as a `BigInt`.
 """
@@ -1236,8 +1134,6 @@ function degree_TT_variety(D, d; method::Symbol=:schur_weingarten, reduce::Bool=
     D = Int[x for x in D]
     d = Int[x for x in d]
     _validate_TT_input(D, d)
-    method in (:schur_weingarten, :subspace) ||
-        throw(ArgumentError("method must be :schur_weingarten or :subspace"))
 
     if reduce
         reduced_D, reduced_d = compress_vacuous_boundary_modes(D, d)
@@ -1247,12 +1143,6 @@ function degree_TT_variety(D, d; method::Symbol=:schur_weingarten, reduce::Bool=
     end
 
     N = Base.length(d)
-
-    if method == :subspace
-        N == 3 || throw(ArgumentError("method=:subspace requires a three-way signature after reduction"))
-        return degree_subspace_variety_N3(D, d)
-    end
-
     P_coeffs = compute_tail_polynomial(D, d, verbose=verbose)
     fP = compute_fP(P_coeffs, D[N], d[N])
 
@@ -1274,7 +1164,7 @@ end
 Compute the projective dimension
 
 ```math
-\\sum_{r=1}^{N-1} D_r(D_{r-1}d_r-D_r) + D_{N-1}d_N - 1
+sum_{r=1}^{N-1} D_r(D_{r-1}d_r-D_r) + D_{N-1}d_N - 1
 ```
 
 for the tensor train signature `D,d`.
@@ -1293,4 +1183,3 @@ function dimension_TT_variety(D, d)
     return running + D[N] * d[N] - 1
 end
 
-end
