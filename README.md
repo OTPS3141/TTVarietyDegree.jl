@@ -9,13 +9,6 @@ polynomial, the final functional `f(P)`, and the degree from the input data.
 
 ## Installation
 
-For local development, run this once from any Julia session:
-
-```julia
-using Pkg
-Pkg.develop(path="/home/user/pCloudDrive/pCloud Backup/ENVY-OTPS/Documents/TENORS/Code/degree_TT_varieties/degree_random_alg_geom")
-```
-
 For a public GitHub repository, use the repository URL:
 
 ```julia
@@ -42,14 +35,11 @@ degree_subspace_variety_N3(D, d)
 Example:
 
 ```julia
+using Pkg
+Pkg.add(url="https://github.com/OTPS3141/TTVarietyDegree.jl")
 using TTVarietyDegree
 
-D = [1, 2, 2, 1]
-d = [3, 3, 3]
-
-P = compute_tail_polynomial(D, d)
-fP = compute_fP(P, D[end - 1], d[end])
-deg = degree_TT_variety(D, d)
+degree_TT_variety([1,2,2,1], [3,3,3])
 ```
 
 `compute_tail_polynomial` is quiet by default. To inspect the recursive
@@ -74,18 +64,6 @@ package namespace. They are still available for inspection using qualified
 names such as `TTVarietyDegree.partitions(5)` or
 `TTVarietyDegree.compute_H_schur((3, 1), 2, 2, 2)`.
 
-## Tests
-
-Run the checks:
-
-```bash
-julia --project=. -e 'using Pkg; Pkg.test()'
-```
-
-or equivalently:
-
-```bash
-julia --project=. test/runtests.jl
 ```
 
 ## Command-Line Scripts
@@ -265,18 +243,4 @@ Passing `method=:subspace` in Julia, or `--subspace` in
 uses the standard subspace-variety coefficient formula. This is kept as a
 separate verification route, not as the default.
 
-## Notes
 
-`compute_H_raw_monomial_by_weingarten` implements the Stiefel Weingarten
-integral by summing over symmetric-group cycle classes. This is equivalent to
-the entrywise expansion in the cheat sheet, but avoids materializing every
-matrix-entry monomial before integration.
-
-The main `compute_H_schur` routine goes one step further: it uses character
-orthogonality to compute the Schur coefficients of the Weingarten integral
-directly. This is still the same Schur-Weingarten calculation, but it avoids
-constructing the intermediate raw monomial or power-sum polynomial.
-
-`scripts/compute_degree.jl` does not compute `P(CC*)` or `f(P)` unless
-`--tail` is passed. With `--tail`, it still skips printing `P(CC*)` when the
-generic tail expansion would require a large Weingarten degree.
