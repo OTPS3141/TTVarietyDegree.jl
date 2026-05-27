@@ -1,0 +1,14 @@
+name = "TTVarietyDegree"
+uuid = "4f13c1e0-4b62-4a71-9505-4d72b03cb2f5"
+authors = ["Otto T.P. Schmidt"]
+version = "0.1.0"
+license = "MIT"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
+
+[compat]
+julia = "1.9"
