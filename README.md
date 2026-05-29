@@ -64,7 +64,6 @@ package namespace. They are still available for inspection using qualified
 names such as `TTVarietyDegree.partitions(5)` or
 `TTVarietyDegree.compute_H_schur((3, 1), 2, 2, 2)`.
 
-```
 
 ## Command-Line Scripts
 
