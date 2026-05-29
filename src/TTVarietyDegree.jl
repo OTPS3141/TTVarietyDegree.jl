@@ -22,7 +22,7 @@ const Partition = Tuple{Vararg{Int}}
 # All rational coefficients use exact BigInt numerator/denominator arithmetic.
 const Rat = Rational{BigInt}
 
-# Memoization tables for the combinatorics and Schur-Weingarten subroutines.
+# Memorization tables for the combinatorics and Schur-Weingarten subroutines.
 const _partition_cache = Dict{Tuple{Int, Int, Int}, Vector{Partition}}()
 const _permutation_cache = Dict{Int, Vector{Vector{Int}}}()
 const _class_permutation_cache = Dict{Int, Dict{Partition, Vector{Vector{Int}}}}()
