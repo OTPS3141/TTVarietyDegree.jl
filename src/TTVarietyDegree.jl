@@ -1183,4 +1183,13 @@ function dimension_TT_variety(D, d)
     return running + D[N] * d[N] - 1
 end
 
+function degree_segre_variety(d::Vector{Int}, N::Int)
+    numerator = _bigfactorial(sum(d))
+    denominator = big(1)
+    for i in 1:(N)
+        denominator *= _bigfactorial(d[i])
+    end
+    return numerator ÷ denominator
+end
+
 end # module TTVarietyDegree
