@@ -1,22 +1,26 @@
 # TTVarietyDegree
 
 Exact computation of degrees of tensor train varieties
-`V^{<=}_{D,d}` using the recursive Schur-Weingarten procedure.
+`V_{D,d}` using the recursive Schur-Weingarten procedure as in the paper 
 
 The implementation is pure Julia and uses `Rational{BigInt}` throughout.
-It does not hardcode the sample cases: the tests compute the recursive tail
-polynomial, the final functional `f(P)`, and the degree from the input data.
 
 ## Installation
 
-For a public GitHub repository, use the repository URL:
+Using the registered package
+
+```julia
+using Pkg
+Pkg.add("TTVarietyDegree")
+```
+
+or via public repository
 
 ```julia
 using Pkg
 Pkg.add(url="https://github.com/OTPS3141/TTVarietyDegree.jl")
 ```
 
-Replace the URL with the actual repository once it is pushed.
 
 ## Julia API
 
@@ -29,14 +33,11 @@ compute_tail_polynomial(D, d; verbose=false)
 compute_fP(P_coeffs, k, n)
 f_schur(lam, k, n)
 compress_vacuous_boundary_modes(D, d)
-degree_subspace_variety_N3(D, d)
 ```
 
-Example:
+Example use of API functions (assuming existing TTVarietyDegree.jl installation):
 
 ```julia
-using Pkg
-Pkg.add(url="https://github.com/OTPS3141/TTVarietyDegree.jl")
 using TTVarietyDegree
 
 degree_TT_variety([1,2,2,1], [3,3,3])
@@ -52,17 +53,6 @@ P = compute_tail_polynomial(D, d; verbose=true)
 By default, `degree_TT_variety(D, d)` first reduces vacuous boundary modes and
 then applies the Schur-Weingarten recursion to the reduced signature.
 
-For three-way reduced signatures, an optional subspace-variety formula is also
-available:
-
-```julia
-deg = degree_TT_variety(D, d; method=:subspace)
-```
-
-Lower-level combinatorial helpers are intentionally not exported from the
-package namespace. They are still available for inspection using qualified
-names such as `TTVarietyDegree.partitions(5)` or
-`TTVarietyDegree.compute_H_schur((3, 1), 2, 2, 2)`.
 
 
 ## Command-Line Scripts
@@ -70,14 +60,7 @@ names such as `TTVarietyDegree.partitions(5)` or
 The runnable utilities live in `scripts/`. Compatibility wrappers remain at
 the package root, so both command styles work.
 
-For a direct computation, edit `D` and `d` at the top of
-`scripts/compute_degree.jl` and run:
-
-```bash
-julia scripts/compute_degree.jl
-```
-
-or pass them as command-line inputs:
+Pass `D` and `d` (first and second argument) as command-line inputs:
 
 ```bash
 julia scripts/compute_degree.jl "[1,2,2,1]" "[3,3,3]"
@@ -97,13 +80,6 @@ tail, add `--verbose`:
 julia scripts/compute_degree.jl "[1,2,2,1]" "[3,3,3]" --tail --verbose
 ```
 
-To explicitly use the optional subspace-variety formula when the reduced input
-is three-way, pass:
-
-```bash
-julia scripts/compute_degree.jl "[1,3,3,3,3,1]" "[3,3,3,3,3]" --subspace
-```
-
 `compute_degree.jl` also starts a resident-memory watchdog. The default limit
 is set near the top of the script as `MAX_RSS_GB = 8.0`. Override it on the
 command line with:
@@ -120,24 +96,6 @@ julia scripts/compute_degree.jl "[1,2,2,1]" "[3,3,3]" --no-ram-limit
 
 If the process exceeds the limit, it exits with code `99` and prints a message
 to stderr. The watchdog reads `/proc/self/status`, so it is intended for Linux.
-
-To regenerate the N=2,3,4 comparison tables with this implementation, run:
-
-```bash
-julia scripts/generate_degree_tables.jl
-```
-
-The output is written to `computed_tables/` as exact integer CSV files:
-
-```text
-computed_tables/TT_variety_degrees_schur_weingarten_N_2.csv
-computed_tables/TT_variety_degrees_schur_weingarten_N_3.csv
-computed_tables/TT_variety_degrees_schur_weingarten_N_4.csv
-```
-
-The row and column signatures are copied from the existing comparison-table
-exports in `../intersection_degree_computations_and_parametrizations/degree_tables`.
-Entries outside the TT admissibility range are written as `0`.
 
 ## Boundary Mode Reduction
 
@@ -230,16 +188,6 @@ d = [9,3,9]
 
 using the Schur-Weingarten recursion.
 
-There is also an optional shortcut for reduced three-way inputs
 
-```text
-D = [1,r,s,1]
-d = [a,b,c].
-```
-
-Passing `method=:subspace` in Julia, or `--subspace` in
-`scripts/compute_degree.jl`,
-uses the standard subspace-variety coefficient formula. This is kept as a
-separate verification route, not as the default.
 
 

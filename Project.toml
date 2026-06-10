@@ -1,7 +1,7 @@
 name = "TTVarietyDegree"
 uuid = "4f13c1e0-4b62-4a71-9505-4d72b03cb2f5"
 authors = ["Otto T.P. Schmidt"]
-version = "0.1.0"
+version = "0.1.1"
 license = "MIT"
 
 [extras]
