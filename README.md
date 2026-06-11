@@ -3,7 +3,7 @@
 Exact computation of degrees of tensor train varieties
 `V_{D,d}` using the recursive Schur-Weingarten procedure as in the paper [here](https://arxiv.org/pdf/2606.11847)
 
-The implementation is pure Julia and uses `Rational{BigInt}` throughout.
+The implementation is pure julia and uses `Rational{BigInt}` throughout.
 
 ## Installation
 
